@@ -83,7 +83,7 @@ class Blob {
     pg_blob_mask.clear();
     //pg_blob_mask.translate(width/2, height/2);
     pg_blob_mask.translate(pg_blob_mask.width * 0.5, pg_blob_mask.height * 0.5);
-    blobShape.setFill(color(255));
+    blobShape.setFill((255 << 24) | (255 << 16) | (255 << 8) | 255);
     pg_blob_mask.shape(blobShape);
     pg_blob_mask.endDraw();
     

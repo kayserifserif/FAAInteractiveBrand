@@ -164,7 +164,9 @@ void draw() {
     if ((pg_sans.pixels[i] >> 24 & 0xFF) != 0) {
       // bit masking formula from oshoham
       // https://github.com/processing/processing/issues/1738
-      int alpha = int(constrain(-(pg_graphic.pixels[i] >> 24 & 0xFF), color(0), color(255)));
+      int min = (255 << 24) | (0 << 16) | (0 << 8) | 0;
+      int max = (255 << 24) | (255 << 16) | (255 << 8) | 255;
+      int alpha = int(constrain(-(pg_graphic.pixels[i] >> 24 & 0xFF), min, max));
       pg_sans.pixels[i] = (alpha << 24) | (pg_sans.pixels[i] & 0xFFFFFF);
     }
   }
@@ -196,20 +198,20 @@ void updateGraphic() {
   
   if (graphic == INK) {
     if (fluidMode == BW) {
-      bgColor = color(255);
-      fillColor = color(0);
+      bgColor = (255 << 24) | (255 << 16) | (255 << 8) | 255;
+      fillColor = (255 << 24) | (0 << 16) | (0 << 8) | 0;
     } else if (fluidMode == COLOR) {
       if (fluidColor == NAVY) {
-        bgColor = color(198, 198, 235);
-        fillColor = color(28, 28, 70);
+        bgColor = (255 << 24) | (198 << 16) | (198 << 8) | 235;
+        fillColor = (255 << 24) | (28 << 16) | (28 << 8) | 70;
       } else if (fluidColor == TEAL) {
-        bgColor = color(177, 213, 213);
-        fillColor = color(15, 77, 77);
+        bgColor = (255 << 24) | (177 << 16) | (213 << 8) | 213;
+        fillColor = (255 << 24) | (15 << 16) | (77 << 8) | 77;
       }
     }
   } else if (graphic == BLOB) {
-    bgColor = color(199, 209, 181);
-    fillColor = color(35, 62, 33);
+    bgColor = (255 << 24) | (199 << 16) | (209 << 8) | 181;
+    fillColor = (255 << 24) | (35 << 16) | (62 << 8) | 33;
   }
 
   pg_sans.beginDraw();

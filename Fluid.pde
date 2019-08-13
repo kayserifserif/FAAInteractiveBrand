@@ -94,9 +94,10 @@ class Fluid implements DwFluid2D.FluidData {
       addDensityBlob(fluid, px, py, fluidRad, 1.0f, 1.0f, 1.0f, 0.01f);
     } else if (fluidMode == COLOR) {
       addDensityBlob(fluid, px, py, fluidRad, 
-        red(fluidColor) / 255.0f, 
-        green(fluidColor) / 255.0f, 
-        blue(fluidColor) / 255.0f, 0.01f);
+        (fluidColor >> 16) & 0xFF,
+        (fluidColor >> 8) & 0xFF,
+        (fluidColor) & 0xFF,
+        0.01f);
     }
   }
   
