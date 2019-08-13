@@ -10,8 +10,10 @@ import processing.video.Capture;
 
 // layout
 boolean isFullScreen = false;
-int canvasWidth = 840;
-int canvasHeight = 1188;
+//int canvasWidth = 840;
+//int canvasHeight = 1188;
+int canvasWidth = 420;
+int canvasHeight = 594;
 int canvasX;
 int canvasY;
 
@@ -32,7 +34,7 @@ PGraphics2D pg_blob_mask;
 // graphic
 int INK = 0;
 int BLOB = 1;
-int graphic = BLOB;
+int graphic = INK;
 PGraphics2D pg_graphic;
 
 // camera
@@ -155,31 +157,24 @@ void draw() {
     pg_graphic = pg_blob_mask;
   }
 
-  // display
-  pg_sans.loadPixels();
-  pg_graphic.loadPixels();
   // sans
-  for (int i = 0; i < pg_sans.pixels.length; i++) {
-    if ((pg_sans.pixels[i] >> 24 & 0xFF) != 0) {
-      // bit masking formula from oshoham
-      // https://github.com/processing/processing/issues/1738
-      int min = (255 << 24) | (0 << 16) | (0 << 8) | 0;
-      int max = (255 << 24) | (255 << 16) | (255 << 8) | 255;
-      int alpha = int(constrain(-(pg_graphic.pixels[i] >> 24 & 0xFF), min, max));
-      pg_sans.pixels[i] = (alpha << 24) | (pg_sans.pixels[i] & 0xFFFFFF);
-    }
-  }
-  pg_sans.updatePixels();
-  // graphic
-  image(pg_sans, canvasX, canvasY);
   if (graphic == INK) {
-    image(pg_graphic, canvasX, canvasY);
-  } else if (graphic == BLOB) {
-    pushStyle();
-    tint(fillColor);
-    image(pg_blob_mask, canvasX, canvasY);
-    popStyle();
+    pg_sans.loadPixels();
+    pg_graphic.loadPixels();
+    for (int i = 0; i < pg_sans.pixels.length; i++) {
+      if ((pg_sans.pixels[i] >> 24 & 0xFF) != 0) {
+        // bit masking formula from oshoham
+        // https://github.com/processing/processing/issues/1738
+        int min = (255 << 24) | (0 << 16) | (0 << 8) | 0;
+        int max = (255 << 24) | (255 << 16) | (255 << 8) | 255;
+        int alpha = int(constrain(-(pg_graphic.pixels[i] >> 24 & 0xFF), min, max));
+        pg_sans.pixels[i] = (alpha << 24) | (pg_sans.pixels[i] & 0xFFFFFF);
+      }
+    }
+    pg_sans.updatePixels();
   }
+  image(pg_sans, canvasX, canvasY);
+  
   // serif
   pg_serif.mask(pg_graphic);
   image(pg_serif, canvasX, canvasY);
