@@ -11,7 +11,7 @@ import processing.video.Capture;
 // graphic
 int INK = 0;
 int BLOB = 1;
-//int graphic = INK;
+int graphic = INK;
 PGraphics2D pg_graphic;
 
 // layout
