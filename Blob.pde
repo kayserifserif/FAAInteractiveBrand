@@ -31,8 +31,8 @@ class Blob {
     for (int i = 0; i < numPoints; i++) {
       float angle = float(i)/numPoints*TWO_PI;
       initPoints[i] = new PVector(
-        radius*(cos(angle)) + random(-randomness, randomness), 
-        radius*(sin(angle)) + random(-randomness, randomness));
+        radius * (cos(angle)) + random(-randomness, randomness), 
+        radius * (sin(angle)) + random(-randomness, randomness));
       blobPoints[i] = new PVector(initPoints[i].x, initPoints[i].y);
       offset[i] = new PVector(random(1000), random(1000));
     }
@@ -71,15 +71,7 @@ class Blob {
     
     generateBlob();
     
-    // graphics buffer
-    pg_blob.beginDraw();
-    pg_blob.clear();
-    pg_blob.translate(pg_blob.width * 0.5, pg_blob.height * 0.5);
-    blobShape.setFill(fillColor);
-    pg_blob.shape(blobShape);
-    pg_blob.endDraw();
-    
-    // mask buffer
+    // mask graphics buffer
     pg_blob_mask.beginDraw();
     pg_blob_mask.clear();
     pg_blob_mask.translate(pg_blob_mask.width * 0.5, pg_blob_mask.height * 0.5);

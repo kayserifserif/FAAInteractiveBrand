@@ -8,12 +8,6 @@ import controlP5.*;
 
 import processing.video.Capture;
 
-// graphic
-int INK = 0;
-int BLOB = 1;
-int graphic = INK;
-PGraphics2D pg_graphic;
-
 // layout
 boolean isFullScreen = false;
 int canvasWidth = 840;
@@ -33,8 +27,13 @@ color fluidColor = NAVY;
 
 // blob
 Blob blob;
-PGraphics2D pg_blob;
 PGraphics2D pg_blob_mask;
+
+// graphic
+int INK = 0;
+int BLOB = 1;
+int graphic = BLOB;
+PGraphics2D pg_graphic;
 
 // camera
 boolean isUsingCam = true;
@@ -104,7 +103,6 @@ void setup() {
 
   // BLOB
   blob = new Blob();
-  pg_blob = (PGraphics2D) createGraphics(canvasWidth, canvasHeight, P2D);
   pg_blob_mask = (PGraphics2D) createGraphics(canvasWidth, canvasHeight, P2D);
   
   // graphic
@@ -177,7 +175,10 @@ void draw() {
   if (graphic == INK) {
     image(pg_graphic, canvasX, canvasY);
   } else if (graphic == BLOB) {
-    image(pg_blob, canvasX, canvasY);
+    pushStyle();
+    tint(fillColor);
+    image(pg_blob_mask, canvasX, canvasY);
+    popStyle();
   }
   // serif
   pg_serif.mask(pg_graphic);
