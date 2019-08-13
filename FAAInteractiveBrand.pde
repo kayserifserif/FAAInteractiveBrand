@@ -9,11 +9,9 @@ import controlP5.*;
 import processing.video.Capture;
 
 // layout
-boolean isFullScreen = false;
-//int canvasWidth = 840;
-//int canvasHeight = 1188;
-int canvasWidth = 420;
-int canvasHeight = 594;
+boolean isFullScreen = true;
+int canvasWidth = 840;
+int canvasHeight = 1188;
 int canvasX;
 int canvasY;
 
@@ -72,6 +70,12 @@ void settings() {
 }
 
 void setup() {
+  
+  if (isFullScreen) {
+    orientation(PORTRAIT);
+    canvasHeight = height;
+    canvasWidth = int(canvasHeight * 0.707);
+  }
   
   canvasX = int((width - canvasWidth) * 0.5);
   canvasY = int((height - canvasHeight) * 0.5);
