@@ -20,17 +20,11 @@ class Fluid implements DwFluid2D.FluidData {
   float fluidVel;
   float fluidRad = 300.0;
   
-  // FLUID MODE
-  // 0 = ink
-  // 1 = colors
-  int fluid_mode = 0;
-  
   Fluid(PApplet papp) {
 
     context = new DwPixelFlow(papp);
     filter = new DwFilter(context);
-    fluid = new DwFluid2D(context, width, height, 1);
-    fluid.addCallback_FluiData(this);
+    newFluid();
   
     // fluid parameters
     fluid.param.dissipation_velocity = dissipVel;
@@ -40,8 +34,10 @@ class Fluid implements DwFluid2D.FluidData {
     //fluid.param.dissipation_temperature = 0.70f;
     //fluid.param.vorticity               = 0.30f;
 
-    opticalflow = new DwOpticalFlow(context, cam_w, cam_h);
-    opticalflow.param.display_mode = 1;
+    if (isUsingCam) {
+      opticalflow = new DwOpticalFlow(context, cam_w, cam_h);
+      opticalflow.param.display_mode = 1;
+    }
   
   }
   
@@ -63,7 +59,11 @@ class Fluid implements DwFluid2D.FluidData {
   }
   
   void reset() { 
-    fluid = new DwFluid2D(context, width, height, 1);
+    newFluid();
+  }
+  
+  void newFluid() {
+    fluid = new DwFluid2D(context, canvasWidth, canvasHeight, 1);
     fluid.addCallback_FluiData(this);
   }
 
@@ -71,8 +71,10 @@ class Fluid implements DwFluid2D.FluidData {
     // this is called during the fluid-simulation update step.
     void update(DwFluid2D fluid) {
     
-    px = width/2;
-    py = height/2;
+    //px = width/2;
+    //py = height/2;
+    px = canvasWidth * 0.5;
+    py = canvasHeight * 0.5;
     
     vx = (round(random(1))*2-1) * random(50.0, 100.0);
     vy = (round(random(1))*2-1) * random(50.0, 100.0);
@@ -83,16 +85,18 @@ class Fluid implements DwFluid2D.FluidData {
     addVelocityBlob(fluid, px, py, fluidVel, vx, vy);
     //addVelocityBlob(fluid, width/2 - 200, height/2, fluidVel, vx, vy);
     //addVelocityBlob(fluid, width/2 + 200, height/2, fluidVel, vx, vy);
-    addVelocityTexture(fluid, opticalflow);
+    if (isUsingCam) {
+      addVelocityTexture(fluid, opticalflow);
+    }
     
-    if (fluid_mode == 0) {
+    if (fluidMode == BW) {
       addDensityBlob(fluid, px, py, fluidRad, 0.0f, 0.0f, 0.0f, 0.01f);
       addDensityBlob(fluid, px, py, fluidRad, 1.0f, 1.0f, 1.0f, 0.01f);
-    } else if (fluid_mode == 1) {
-      addDensityBlob(fluid, width/2, height/2, fluidRad, 0.0f, 0.0f, 1.0f, 0.01f);
-      //addDensityBlob(fluid, width/2, height/2, fluidRad, 0.0f, 1.0f, 1.0f, 0.01f);
-      //addDensityBlob(fluid, width/2 - 200, height/2, fluidRad, 0.0f, 0.0f, 1.0f, 0.01f);
-      //addDensityBlob(fluid, width/2 + 200, height/2, fluidRad, 0.0f, 1.0f, 1.0f, 0.01f);
+    } else if (fluidMode == COLOR) {
+      addDensityBlob(fluid, px, py, fluidRad, 
+        red(fluidColor) / 255.0f, 
+        green(fluidColor) / 255.0f, 
+        blue(fluidColor) / 255.0f, 0.01f);
     }
   }
   

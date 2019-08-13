@@ -72,7 +72,8 @@ class Blob {
     // graphics buffer
     pg_blob.beginDraw();
     pg_blob.clear();
-    pg_blob.translate(width/2, height/2);
+    //pg_blob.translate(width/2, height/2);
+    pg_blob.translate(pg_blob.width * 0.5, pg_blob.height * 0.5);
     blobShape.setFill(fillColor);
     pg_blob.shape(blobShape);
     pg_blob.endDraw();
@@ -80,7 +81,8 @@ class Blob {
     // mask buffer
     pg_blob_mask.beginDraw();
     pg_blob_mask.clear();
-    pg_blob_mask.translate(width/2, height/2);
+    //pg_blob_mask.translate(width/2, height/2);
+    pg_blob_mask.translate(pg_blob_mask.width * 0.5, pg_blob_mask.height * 0.5);
     blobShape.setFill(color(255));
     pg_blob_mask.shape(blobShape);
     pg_blob_mask.endDraw();

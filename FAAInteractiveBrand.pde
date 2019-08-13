@@ -8,15 +8,28 @@ import controlP5.*;
 
 import processing.video.Capture;
 
-// GRAPHIC
-// 0 = INK
-// 1 = BLOB
-int graphic = 0;
+// graphic
+int INK = 0;
+int BLOB = 1;
+//int graphic = INK;
 PGraphics2D pg_graphic;
+
+// layout
+boolean isFullScreen = false;
+int canvasWidth = 840;
+int canvasHeight = 1188;
+int canvasX;
+int canvasY;
 
 // fluid
 Fluid fluid_data;
 PGraphics2D pg_fluid;
+int BW = 0;
+int COLOR = 1;
+int fluidMode = BW;
+color NAVY = color(0, 0, 255);
+color TEAL = color(0, 255, 255);
+color fluidColor = NAVY;
 
 // blob
 Blob blob;
@@ -24,7 +37,8 @@ PGraphics2D pg_blob;
 PGraphics2D pg_blob_mask;
 
 // camera
-boolean showCam = true;
+boolean isUsingCam = true;
+boolean isShowingCam = false;
 Capture cam;
 int cam_w = 640;
 int cam_h = 480;
@@ -48,49 +62,59 @@ ControlP5 cp5;
 ButtonBar bb;
 int bbHeight = 20;
 
+void settings() {
+  if (isFullScreen) {
+    fullScreen(P2D);
+  } else {
+    size(canvasWidth, canvasHeight, P2D);
+  }
+}
+
 void setup() {
   
-  //fullScreen();
-  size(840, 1188, P2D);
+  canvasX = int((width - canvasWidth) * 0.5);
+  canvasY = int((height - canvasHeight) * 0.5);
 
   // shapes
-  pg_sans = createGraphics(width, height);
-  pg_serif = createGraphics(width, height);
+  pg_sans = createGraphics(canvasWidth, canvasHeight);
+  pg_serif = createGraphics(canvasWidth, canvasHeight);
   sansShape = loadShape("logo_sans.svg");
   serifShape = loadShape("logo_serif.svg");
-  scaleFac = (width - hmargin*2)/serifShape.width;
+  scaleFac = (canvasWidth - hmargin*2) / serifShape.width;
   sansShape.scale(scaleFac);
   serifShape.scale(scaleFac);
-  vmargin = (height - sansShape.height*scaleFac)*0.5;
+  vmargin = (canvasHeight - sansShape.height*scaleFac) * 0.5;
     
   // FLUID
   fluid_data = new Fluid(this);
-  pg_fluid = (PGraphics2D) createGraphics(width, height, P2D);
+  pg_fluid = (PGraphics2D) createGraphics(canvasWidth, canvasHeight, P2D);
   // camera
-  cam = new Capture(this, cam_w, cam_h, 30);
-  cam.start();
-  // render buffers
-  pg_cam_a = (PGraphics2D) createGraphics(cam_w, cam_h, P2D);
-  pg_cam_a.noSmooth();
-  pg_cam_a.beginDraw();
-  pg_cam_a.background(0);
-  pg_cam_a.endDraw();
-  pg_cam_b = (PGraphics2D) createGraphics(cam_w, cam_h, P2D);
-  pg_cam_b.noSmooth();
+  if (isUsingCam) {
+    cam = new Capture(this, cam_w, cam_h, 30);
+    cam.start();
+    // render buffers
+    pg_cam_a = (PGraphics2D) createGraphics(cam_w, cam_h, P2D);
+    pg_cam_a.noSmooth();
+    pg_cam_a.beginDraw();
+    pg_cam_a.background(0);
+    pg_cam_a.endDraw();
+    pg_cam_b = (PGraphics2D) createGraphics(cam_w, cam_h, P2D);
+    pg_cam_b.noSmooth();
+  }
 
   // BLOB
   blob = new Blob();
-  pg_blob = (PGraphics2D) createGraphics(width, height, P2D);
-  pg_blob_mask = (PGraphics2D) createGraphics(width, height, P2D);
+  pg_blob = (PGraphics2D) createGraphics(canvasWidth, canvasHeight, P2D);
+  pg_blob_mask = (PGraphics2D) createGraphics(canvasWidth, canvasHeight, P2D);
   
   // graphic
-  pg_graphic = (PGraphics2D) createGraphics(width, height, P2D);
+  pg_graphic = (PGraphics2D) createGraphics(canvasWidth, canvasHeight, P2D);
   
   // controls
   cp5 = new ControlP5(this);
   bb = cp5.addButtonBar("selectGraphic")
-          .setPosition(0, 0)
-          .setSize(width, bbHeight)
+          .setPosition(canvasX, canvasY)
+          .setSize(canvasWidth, bbHeight)
           .addItems(new String[] {"ink", "jade"})
           ;
   bb.changeItem("ink", "text", "");
@@ -110,22 +134,24 @@ void draw() {
   background(bgColor);
   
   // display cam
-  if ( cam.available() ) {
-    cam.read();
-    fluid_data.updateCam();
-  }
-  if (showCam) {
-    pushStyle();
-    tint(255, 50);
-    image(pg_cam_a, 0, 0, width, height);
-    popStyle();
+  if (isUsingCam) {
+    if ( cam.available() ) {
+      cam.read();
+      fluid_data.updateCam();
+    }
+    if (isShowingCam) {
+      pushStyle();
+      tint(255, 50);
+      image(pg_cam_a, canvasX, canvasY, canvasWidth, canvasHeight);
+      popStyle();
+    }
   }
   
   // prepare graphic
-  if (graphic == 0) {
+  if (graphic == INK) {
     fluid_data.display();
     pg_graphic = pg_fluid;
-  } else if (graphic == 1) {
+  } else if (graphic == BLOB) {
     blob.display();
     pg_graphic = pg_blob_mask;
   }
@@ -144,18 +170,20 @@ void draw() {
   }
   pg_sans.updatePixels();
   // graphic
-  image(pg_sans, 0, 0);
-  if (graphic == 0) {
-    image(pg_graphic, 0, 0);
-  } else if (graphic == 1) {
-    image(pg_blob, 0, 0);
+  image(pg_sans, canvasX, canvasY);
+  if (graphic == INK) {
+    image(pg_graphic, canvasX, canvasY);
+  } else if (graphic == BLOB) {
+    image(pg_blob, canvasX, canvasY);
   }
   // serif
   pg_serif.mask(pg_graphic);
-  image(pg_serif, 0, 0);
+  image(pg_serif, canvasX, canvasY);
 
   // show title bar info
-  info();
+  if (!isFullScreen) {
+    info();
+  }
   
 }
 
@@ -166,13 +194,20 @@ void selectGraphic(int n) {
 
 void updateGraphic() {
   
-  if (graphic == 0) {
-    bgColor = color(255);
-    fillColor = color(0);
-    //fillColor = color(0, 0, 50);
-    //fillColor = color(0, 50, 50);
-    //fillColor = color(0, 50, 75);
-  } else if (graphic == 1) {
+  if (graphic == INK) {
+    if (fluidMode == BW) {
+      bgColor = color(255);
+      fillColor = color(0);
+    } else if (fluidMode == COLOR) {
+      if (fluidColor == NAVY) {
+        bgColor = color(198, 198, 235);
+        fillColor = color(28, 28, 70);
+      } else if (fluidColor == TEAL) {
+        bgColor = color(177, 213, 213);
+        fillColor = color(15, 77, 77);
+      }
+    }
+  } else if (graphic == BLOB) {
     bgColor = color(199, 209, 181);
     fillColor = color(35, 62, 33);
   }
@@ -200,7 +235,7 @@ void updateGraphic() {
 }
 
 void mousePressed() {
-  if (mouseY > bbHeight) {
+  if (mouseY > canvasY + bbHeight && mouseY < canvasY + canvasHeight) {
     if (graphic == 0) {
       fluid_data.reset();
     } else if (graphic == 1) {
