@@ -3,8 +3,8 @@ class Blob {
   // shape
   PShape blobShape;
   int numPoints = 5;
-  float radius = 350.0;
-  float randomness = 100.0;
+  float radius;
+  float randomness;
   PVector[] initPoints;
   PVector[] offset;
   PVector[] blobPoints;
@@ -14,6 +14,9 @@ class Blob {
   float speed = 0.01;
 
   Blob() {
+    radius = canvasWidth * 0.4;
+    randomness = radius * 0.3;
+    
     initPoints = new PVector[numPoints];
     offset = new PVector[numPoints];
     blobPoints = new PVector[numPoints];
@@ -47,7 +50,6 @@ class Blob {
     // create blob shape
     blobShape = createShape();
     blobShape.beginShape();
-    //blobShape.fill(fillColor);
     blobShape.noStroke();
     blobShape.curveVertex(blobPoints[numPoints-1].x, blobPoints[numPoints-1].y);
     for (int i = 0; i < numPoints; i++) {
@@ -72,7 +74,6 @@ class Blob {
     // graphics buffer
     pg_blob.beginDraw();
     pg_blob.clear();
-    //pg_blob.translate(width/2, height/2);
     pg_blob.translate(pg_blob.width * 0.5, pg_blob.height * 0.5);
     blobShape.setFill(fillColor);
     pg_blob.shape(blobShape);
@@ -81,7 +82,6 @@ class Blob {
     // mask buffer
     pg_blob_mask.beginDraw();
     pg_blob_mask.clear();
-    //pg_blob_mask.translate(width/2, height/2);
     pg_blob_mask.translate(pg_blob_mask.width * 0.5, pg_blob_mask.height * 0.5);
     blobShape.setFill((255 << 24) | (255 << 16) | (255 << 8) | 255);
     pg_blob_mask.shape(blobShape);

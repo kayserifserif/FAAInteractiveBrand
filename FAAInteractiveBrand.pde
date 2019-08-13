@@ -60,7 +60,7 @@ color fillColor;
 // controls
 ControlP5 cp5;
 ButtonBar bb;
-int bbHeight = 20;
+int bbHeight;
 
 void settings() {
   if (isFullScreen) {
@@ -112,6 +112,7 @@ void setup() {
   
   // controls
   cp5 = new ControlP5(this);
+  bbHeight = int(canvasHeight * 0.02);
   bb = cp5.addButtonBar("selectGraphic")
           .setPosition(canvasX, canvasY)
           .setSize(canvasWidth, bbHeight)

@@ -18,7 +18,7 @@ class Fluid implements DwFluid2D.FluidData {
   float dissipVel = 0.99f;
   float dissipDens = 0.99f;
   float fluidVel;
-  float fluidRad = 300.0;
+  float fluidRad;
   
   Fluid(PApplet papp) {
 
@@ -27,6 +27,7 @@ class Fluid implements DwFluid2D.FluidData {
     newFluid();
   
     // fluid parameters
+    fluidRad = width * 0.35;
     fluid.param.dissipation_velocity = dissipVel;
     fluid.param.dissipation_density  = dissipDens;
     //fluid.param.dissipation_density     = 0.90f;
@@ -71,8 +72,6 @@ class Fluid implements DwFluid2D.FluidData {
     // this is called during the fluid-simulation update step.
     void update(DwFluid2D fluid) {
     
-    //px = width/2;
-    //py = height/2;
     px = canvasWidth * 0.5;
     py = canvasHeight * 0.5;
     
@@ -81,10 +80,7 @@ class Fluid implements DwFluid2D.FluidData {
 
     fluidVel = constrain(60.0/(round(frameCount*0.01)), 10.0f, 30.0f);
     
-    //fluid.addVelocity(px, py, fluidVel, vx, vy);
     addVelocityBlob(fluid, px, py, fluidVel, vx, vy);
-    //addVelocityBlob(fluid, width/2 - 200, height/2, fluidVel, vx, vy);
-    //addVelocityBlob(fluid, width/2 + 200, height/2, fluidVel, vx, vy);
     if (isUsingCam) {
       addVelocityTexture(fluid, opticalflow);
     }
