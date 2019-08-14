@@ -1,19 +1,19 @@
 class Blob {
 
   // shape
-  PShape blobShape;
-  int numPoints = 5;
-  float radius;
-  float randomness;
-  PVector[] initPoints;
-  PVector[] offset;
-  PVector[] blobPoints;
+  private PShape blobShape;
+  private int numPoints = 5;
+  private float radius;
+  private float randomness;
+  private PVector[] initPoints;
+  private PVector[] offset;
+  private PVector[] blobPoints;
 
   // animation
-  float stepSize = 0.5;
-  float speed = 0.01;
+  private float stepSize = 0.5;
+  private float speed = 0.01;
 
-  Blob() {
+  public Blob() {
     radius = canvasWidth * 0.4;
     randomness = radius * 0.3;
     
@@ -23,11 +23,11 @@ class Blob {
     generatePoints();
   }
   
-  void reset() {
+  public void reset() {
     generatePoints();
   }
 
-  void generatePoints() {
+  private void generatePoints() {
     for (int i = 0; i < numPoints; i++) {
       float angle = float(i)/numPoints*TWO_PI;
       initPoints[i] = new PVector(
@@ -38,7 +38,7 @@ class Blob {
     }
   }
 
-  void generateBlob() {
+  private void generateBlob() {
 
     // move points
     for (int i = 0; i < numPoints; i++) {
@@ -67,7 +67,7 @@ class Blob {
     
   }
 
-  void display() {
+  public void display() {
     
     generateBlob();
     

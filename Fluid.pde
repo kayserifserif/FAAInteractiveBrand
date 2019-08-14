@@ -1,26 +1,33 @@
 class Fluid implements DwFluid2D.FluidData {
   
   // library context
-  DwPixelFlow context;
+  private DwPixelFlow context;
   
   // collection of imageprocessing filters
-  DwFilter filter;
+  private DwFilter filter;
   
   // fluid solver
-  DwFluid2D fluid;
+  private DwFluid2D fluid;
 
   // optical flow
-  DwOpticalFlow opticalflow;
+  private DwOpticalFlow opticalflow;
 
   // fluid parameters
-  float px, py;
-  float vx, vy;
-  float dissipVel = 0.99f;
-  float dissipDens = 0.99f;
-  float fluidVel;
-  float fluidRad;
+  private float px, py;
+  private float vx, vy;
+  private float dissipVel = 0.99f;
+  private float dissipDens = 0.99f;
+  private float fluidVel;
+  private float fluidRad;
   
-  Fluid(PApplet papp) {
+  static final int BW = 0;
+  static final int COLOR = 1;
+  //static final color NAVY = color(0, 0, 255);
+  static final color NAVY = -16776961;
+  //static final color TEAL = color(0, 255, 255);
+  static final color TEAL = -16711681;
+  
+  public Fluid(PApplet papp) {
 
     context = new DwPixelFlow(papp);
     filter = new DwFilter(context);
@@ -42,7 +49,7 @@ class Fluid implements DwFluid2D.FluidData {
   
   }
   
-  void updateCam() {
+  public void updateCam() {
     // render to offscreenbuffer
     pg_cam_b.beginDraw();
     pg_cam_b.background(0);
@@ -59,18 +66,18 @@ class Fluid implements DwFluid2D.FluidData {
     swapCamBuffer();
   }
   
-  void reset() { 
+  public void reset() { 
     newFluid();
   }
   
-  void newFluid() {
+  private void newFluid() {
     fluid = new DwFluid2D(context, canvasWidth, canvasHeight, 1);
     fluid.addCallback_FluiData(this);
   }
 
   @Override
     // this is called during the fluid-simulation update step.
-    void update(DwFluid2D fluid) {
+    public void update(DwFluid2D fluid) {
     
     px = canvasWidth * 0.5;
     py = canvasHeight * 0.5;
@@ -97,7 +104,7 @@ class Fluid implements DwFluid2D.FluidData {
     }
   }
   
-  void display() {
+  public void display() {
     // render everything
     pg_fluid.beginDraw();
     pg_fluid.clear();
@@ -107,7 +114,7 @@ class Fluid implements DwFluid2D.FluidData {
     fluid.renderFluidTextures(pg_fluid, 0);
   }
   
-  void addDensityBlob(DwFluid2D fluid,
+  private void addDensityBlob(DwFluid2D fluid,
       float px, float py, float fluidRad,
       float r, float g, float b, float intensity) {
     context.begin();
@@ -127,7 +134,7 @@ class Fluid implements DwFluid2D.FluidData {
     fluid.tex_density.swap();
   }
   
-  void addVelocityBlob(DwFluid2D fluid,
+  private void addVelocityBlob(DwFluid2D fluid,
       float px, float py, float fluidVel,
       float vx, float vy) {
     context.begin();
@@ -148,7 +155,7 @@ class Fluid implements DwFluid2D.FluidData {
   }
 
   // custom shader, to add density from a texture (PGraphics2D) to the fluid.
-  void addVelocityTexture(DwFluid2D fluid, DwOpticalFlow opticalflow) {
+  private void addVelocityTexture(DwFluid2D fluid, DwOpticalFlow opticalflow) {
     context.begin();
     context.beginDraw(fluid.tex_velocity.dst);
     DwGLSLProgram shader = context.createShader("data/addVelocity.frag");
@@ -166,7 +173,7 @@ class Fluid implements DwFluid2D.FluidData {
     fluid.tex_velocity.swap();
   }
 
-  void swapCamBuffer() {
+  private void swapCamBuffer() {
     PGraphics2D tmp = pg_cam_a;
     pg_cam_a = pg_cam_b;
     pg_cam_b = tmp;

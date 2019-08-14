@@ -9,59 +9,56 @@ import controlP5.*;
 import processing.video.Capture;
 
 // layout
-boolean isFullScreen = true;
-int canvasWidth = 840;
-int canvasHeight = 1188;
-int canvasX;
-int canvasY;
+public boolean isFullScreen = true;
+public int canvasWidth = 840;
+public int canvasHeight = 1188;
+public int canvasX;
+public int canvasY;
 
 // fluid
-Fluid fluid_data;
-PGraphics2D pg_fluid;
-int BW = 0;
-int COLOR = 1;
-int fluidMode = BW;
-color NAVY = color(0, 0, 255);
-color TEAL = color(0, 255, 255);
-color fluidColor = NAVY;
+public Fluid fluid_data;
+public PGraphics2D pg_fluid;
+public int fluidMode = Fluid.BW; // BW, COLOR
+public color fluidColor = Fluid.NAVY; // NAVY, TEAL
 
 // blob
-Blob blob;
-PGraphics2D pg_blob_mask;
+public Blob blob;
+public PGraphics2D pg_blob_mask;
 
 // graphic
-int INK = 0;
-int BLOB = 1;
-int graphic = INK;
-PGraphics2D pg_graphic;
+static final int INK = 0;
+static final int BLOB = 1;
+public int graphic = INK;
+public PGraphics2D pg_graphic;
 
 // camera
-boolean isUsingCam = true;
-boolean isShowingCam = false;
-Capture cam;
-int cam_w = 640;
-int cam_h = 480;
-PGraphics2D pg_cam_a, pg_cam_b;
+public boolean isUsingCam = true;
+public boolean isShowingCam = false;
+public Capture cam;
+public int cam_w = 640;
+public int cam_h = 480;
+public PGraphics2D pg_cam_a;
+public PGraphics2D pg_cam_b;
 
 // shapes
-PShape sansShape;
-PShape serifShape;
-PGraphics pg_sans;
-PGraphics pg_serif;
-float scaleFac;
-float hmargin = 75.0;
-float vmargin;
+public PShape sansShape;
+public PShape serifShape;
+public PGraphics pg_sans;
+public PGraphics pg_serif;
+private float scaleFac;
+private float hmargin = 75.0;
+private float vmargin;
 
 // color
-color bgColor;
-color fillColor;
+public color bgColor;
+public color fillColor;
 
 // controls
-ControlP5 cp5;
-ButtonBar bb;
-int bbHeight;
+public ControlP5 cp5;
+public ButtonBar bb;
+public int bbHeight;
 
-void settings() {
+public void settings() {
   if (isFullScreen) {
     fullScreen(P2D);
   } else {
@@ -69,7 +66,7 @@ void settings() {
   }
 }
 
-void setup() {
+public void setup() {
   
   if (isFullScreen) {
     orientation(PORTRAIT);
@@ -134,7 +131,7 @@ void setup() {
   
 }
 
-void draw() {
+public void draw() {
 
   background(bgColor);
   
@@ -190,22 +187,22 @@ void draw() {
   
 }
 
-void selectGraphic(int n) {
+public void selectGraphic(int n) {
   graphic = n;
   updateGraphic();
 }
 
-void updateGraphic() {
+public void updateGraphic() {
   
   if (graphic == INK) {
-    if (fluidMode == BW) {
+    if (fluidMode == Fluid.BW) {
       bgColor = (255 << 24) | (255 << 16) | (255 << 8) | 255;
       fillColor = (255 << 24) | (0 << 16) | (0 << 8) | 0;
-    } else if (fluidMode == COLOR) {
-      if (fluidColor == NAVY) {
+    } else if (fluidMode == Fluid.COLOR) {
+      if (fluidColor == Fluid.NAVY) {
         bgColor = (255 << 24) | (198 << 16) | (198 << 8) | 235;
         fillColor = (255 << 24) | (28 << 16) | (28 << 8) | 70;
-      } else if (fluidColor == TEAL) {
+      } else if (fluidColor == Fluid.TEAL) {
         bgColor = (255 << 24) | (177 << 16) | (213 << 8) | 213;
         fillColor = (255 << 24) | (15 << 16) | (77 << 8) | 77;
       }
@@ -237,7 +234,7 @@ void updateGraphic() {
     
 }
 
-void mousePressed() {
+public void mousePressed() {
   if (mouseY > canvasY + bbHeight && mouseY < canvasY + canvasHeight) {
     if (graphic == 0) {
       fluid_data.reset();
@@ -247,7 +244,7 @@ void mousePressed() {
   }
 }
 
-void info() {
+private void info() {
   String s = String.format(getClass().getName() + " [fps %6.2f]", frameRate);
   surface.setTitle(s);
 }
