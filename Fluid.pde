@@ -34,7 +34,7 @@ class Fluid implements DwFluid2D.FluidData {
     newFluid();
   
     // fluid parameters
-    fluidRad = width * 0.35;
+    fluidRad = canvasWidth * 0.35;
     fluid.param.dissipation_velocity = dissipVel;
     fluid.param.dissipation_density  = dissipDens;
     //fluid.param.dissipation_density     = 0.90f;
