@@ -9,7 +9,7 @@ import controlP5.*;
 import processing.video.Capture;
 
 // layout
-public boolean isFullScreen = true;
+public boolean isFullScreen = false;
 public int canvasWidth = 840;
 public int canvasHeight = 1188;
 public int canvasX;
@@ -18,6 +18,7 @@ public int canvasY;
 // fluid
 public Fluid fluid_data;
 public PGraphics2D pg_fluid;
+public PGraphics2D pg_fluid_bw;
 public int fluidMode = Fluid.BW; // BW, COLOR
 public color fluidColor = Fluid.NAVY; // NAVY, TEAL
 
@@ -53,6 +54,9 @@ private float vmargin;
 public color bgColor;
 public color fillColor;
 
+// shader
+PShader shader;
+
 // controls
 public ControlP5 cp5;
 public ButtonBar bb;
@@ -68,11 +72,13 @@ public void settings() {
 
 public void setup() {
   
-  if (isFullScreen) {
-    orientation(PORTRAIT);
-    canvasHeight = height;
-    canvasWidth = int(canvasHeight * 0.707);
-  }
+  frameRate(120);
+  
+  //if (isFullScreen) {
+  //  orientation(PORTRAIT);
+  //  canvasHeight = height;
+  //  canvasWidth = int(canvasHeight * 0.707);
+  //}
   
   canvasX = int((width - canvasWidth) * 0.5);
   canvasY = int((height - canvasHeight) * 0.5);
@@ -90,6 +96,7 @@ public void setup() {
   // FLUID
   fluid_data = new Fluid(this);
   pg_fluid = (PGraphics2D) createGraphics(canvasWidth, canvasHeight, P2D);
+  //pg_fluid_bw = (PGraphics2D) createGraphics(canvasWidth, canvasHeight, P2D);
   // camera
   if (isUsingCam) {
     cam = new Capture(this, cam_w, cam_h, 30);
@@ -112,20 +119,22 @@ public void setup() {
   pg_graphic = (PGraphics2D) createGraphics(canvasWidth, canvasHeight, P2D);
   
   // controls
-  cp5 = new ControlP5(this);
-  bbHeight = int(canvasHeight * 0.02);
-  bb = cp5.addButtonBar("selectGraphic")
-          .setPosition(canvasX, canvasY)
-          .setSize(canvasWidth, bbHeight)
-          .addItems(new String[] {"ink", "jade"})
-          ;
-  bb.changeItem("ink", "text", "");
-  bb.changeItem("jade", "text", "");
-  if (graphic == 0) {
-    bb.changeItem("ink", "selected", true);
-  } else if (graphic == 1) {
-    bb.changeItem("jade", "selected", true);
-  }
+  //cp5 = new ControlP5(this);
+  //bbHeight = int(canvasHeight * 0.02);
+  //bb = cp5.addButtonBar("selectGraphic")
+  //        .setPosition(canvasX, canvasY)
+  //        .setSize(canvasWidth, bbHeight)
+  //        .addItems(new String[] {"ink", "jade"})
+  //        ;
+  //bb.changeItem("ink", "text", "");
+  //bb.changeItem("jade", "text", "");
+  //if (graphic == 0) {
+  //  bb.changeItem("ink", "selected", true);
+  //} else if (graphic == 1) {
+  //  bb.changeItem("jade", "selected", true);
+  //}
+  
+  shader = loadShader("blend.glsl");
   
   updateGraphic();
   
@@ -141,44 +150,79 @@ public void draw() {
       cam.read();
       fluid_data.updateCam();
     }
-    if (isShowingCam) {
-      pushStyle();
-      tint(255, 50);
-      image(pg_cam_a, canvasX, canvasY, canvasWidth, canvasHeight);
-      popStyle();
-    }
+    //if (isShowingCam) {
+    //  pushStyle();
+    //  tint(255, 50);
+    //  image(pg_cam_a, canvasX, canvasY, canvasWidth, canvasHeight);
+    //  popStyle();
+    //}
   }
   
   // prepare graphic
   if (graphic == INK) {
     fluid_data.display();
-    pg_graphic = pg_fluid;
+    //pg_graphic = pg_fluid;
+    if (isShowingCam) {
+      shader.set("tex_cam", cam);
+    }
+    shader.set("tex_fluid", pg_fluid);
+    shader.set("tex_sans", pg_sans);
+    shader.set("tex_serif", pg_serif);
+    shader(shader);
+    rect(0, 0, width, height);
+    //pg_fluid_bw = pg_fluid;
+    //pg_fluid_bw.beginDraw();
+    //pg_fluid_bw.filter(THRESHOLD);
+    //pg_fluid_bw.endDraw();
+    //pg_fluid_bw.loadPixels();
+    //for (int i = 0; i < pg_fluid_bw.pixels.length; i++) {
+    //  color pixel = pg_fluid_bw.pixels[i];
+    //  if ((pixel >> 24 & 0xFF) == 255) {
+    //    println(pixel);
+    //    if ((pixel >> 16 & 0xFF) > 127 &&
+    //        (pixel >> 8 & 0xFF) > 127 &&
+    //        (pixel & 0xFF) > 127) {
+    //      pg_fluid_bw.pixels[i] = (255 << 24) | (255 << 16) | (255 << 8) | 255;
+    //    } else {
+    //      pg_fluid_bw.pixels[i] = (255 << 24) | (0 << 16) | (0 << 8) | 0;
+    //    }
+    //  }
+    //}
+    //pg_fluid_bw.updatePixels();
   } else if (graphic == BLOB) {
     blob.display();
     pg_graphic = pg_blob_mask;
   }
 
   // sans
-  if (graphic == INK) {
-    pg_sans.loadPixels();
-    pg_graphic.loadPixels();
-    for (int i = 0; i < pg_sans.pixels.length; i++) {
-      if ((pg_sans.pixels[i] >> 24 & 0xFF) != 0) {
-        // bit masking formula from oshoham
-        // https://github.com/processing/processing/issues/1738
-        int min = (255 << 24) | (0 << 16) | (0 << 8) | 0;
-        int max = (255 << 24) | (255 << 16) | (255 << 8) | 255;
-        int alpha = int(constrain(-(pg_graphic.pixels[i] >> 24 & 0xFF), min, max));
-        pg_sans.pixels[i] = (alpha << 24) | (pg_sans.pixels[i] & 0xFFFFFF);
-      }
-    }
-    pg_sans.updatePixels();
-  }
-  image(pg_sans, canvasX, canvasY);
+  //if (graphic == INK) {
+  //  pg_sans.loadPixels();
+  //  pg_graphic.loadPixels();
+  //  //pg_fluid_bw.loadPixels();
+  //  for (int i = 0; i < pg_sans.pixels.length; i++) {
+  //    if ((pg_sans.pixels[i] >> 24 & 0xFF) != 0) {
+  //      // bit masking formula from oshoham
+  //      // https://github.com/processing/processing/issues/1738
+  //      int min = (255 << 24) | (0 << 16) | (0 << 8) | 0;
+  //      int max = (255 << 24) | (255 << 16) | (255 << 8) | 255;
+  //      int alpha = int(constrain(-(pg_graphic.pixels[i] >> 24 & 0xFF), min, max));
+  //      //int alpha = int(constrain(-(pg_fluid_bw.pixels[i] >> 24 & 0xFF), min, max));
+  //      pg_sans.pixels[i] = (alpha << 24) | (pg_sans.pixels[i] & 0xFFFFFF);
+  //    }
+  //  }
+  //  pg_sans.updatePixels();
+  //}
+  //image(pg_sans, canvasX, canvasY);
+  //image(pg_fluid, 0, 0);
   
   // serif
-  pg_serif.mask(pg_graphic);
-  image(pg_serif, canvasX, canvasY);
+  //if (graphic == INK) {
+  //  //pg_serif.mask(pg_fluid_bw);
+  //  pg_serif.mask(pg_graphic);
+  //} else {
+  //  pg_serif.mask(pg_graphic);
+  //}
+  //image(pg_serif, canvasX, canvasY);
 
   // show title bar info
   if (!isFullScreen) {
@@ -187,10 +231,10 @@ public void draw() {
   
 }
 
-public void selectGraphic(int n) {
-  graphic = n;
-  updateGraphic();
-}
+//public void selectGraphic(int n) {
+//  graphic = n;
+//  updateGraphic();
+//}
 
 public void updateGraphic() {
   
@@ -221,27 +265,27 @@ public void updateGraphic() {
 
   pg_serif.beginDraw();
   pg_serif.noStroke();
-  pg_serif.background(fillColor);
+  //pg_serif.background(fillColor);
   pg_serif.translate(hmargin, vmargin);
   serifShape.setFill(bgColor);
   serifShape.draw(pg_serif);
   pg_serif.endDraw();
   
-  bb.setColorForeground(lerpColor(bgColor, fillColor, 0.5))
-    .setColorActive(bgColor)
-    .setColorBackground(fillColor)
-    ;
+  //bb.setColorForeground(lerpColor(bgColor, fillColor, 0.5))
+  //  .setColorActive(bgColor)
+  //  .setColorBackground(fillColor)
+  //  ;
     
 }
 
 public void mousePressed() {
-  if (mouseY > canvasY + bbHeight && mouseY < canvasY + canvasHeight) {
+  //if (mouseY > canvasY + bbHeight && mouseY < canvasY + canvasHeight) {
     if (graphic == 0) {
       fluid_data.reset();
     } else if (graphic == 1) {
       blob.reset();
     }
-  }
+  //}
 }
 
 private void info() {

@@ -22,10 +22,8 @@ class Fluid implements DwFluid2D.FluidData {
   
   static final int BW = 0;
   static final int COLOR = 1;
-  //static final color NAVY = color(0, 0, 255);
-  static final color NAVY = -16776961;
-  //static final color TEAL = color(0, 255, 255);
-  static final color TEAL = -16711681;
+  static final color NAVY = -16776961; // color(0, 0, 255)
+  static final color TEAL = -16711681; // color(0, 255, 255)
   
   public Fluid(PApplet papp) {
 
@@ -94,7 +92,7 @@ class Fluid implements DwFluid2D.FluidData {
     
     if (fluidMode == BW) {
       addDensityBlob(fluid, px, py, fluidRad, 0.0f, 0.0f, 0.0f, 0.01f);
-      addDensityBlob(fluid, px, py, fluidRad, 1.0f, 1.0f, 1.0f, 0.01f);
+      //addDensityBlob(fluid, px, py, fluidRad, 1.0f, 1.0f, 1.0f, 0.01f);
     } else if (fluidMode == COLOR) {
       addDensityBlob(fluid, px, py, fluidRad, 
         (fluidColor >> 16) & 0xFF,
