@@ -3,8 +3,7 @@ precision mediump float;
 precision mediump int;
 #endif
 
-// uniform vec2 u_resolution;
-uniform sampler2D tex_cam;
+// uniform sampler2D tex_cam;
 uniform sampler2D tex_fluid;
 uniform sampler2D tex_sans;
 uniform sampler2D tex_serif;
@@ -27,7 +26,7 @@ void main() {
   vec4 sans = texture2D(tex_sans, texCoord);
   vec4 serif = texture2D(tex_serif, texCoord);
   // blend
-  sans = step((1.0 - mask.a), sans); // inverted mask
+  sans = step(1.0 - mask.a, sans); // inverted mask
   serif = step(mask.a, serif); // mask
   vec4 color = fluid + sans * serif;
   gl_FragColor = color;
