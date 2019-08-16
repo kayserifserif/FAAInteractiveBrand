@@ -71,13 +71,14 @@ class Blob {
     
     generateBlob();
     
-    // mask graphics buffer
-    pg_blob_mask.beginDraw();
-    pg_blob_mask.clear();
-    pg_blob_mask.translate(pg_blob_mask.width * 0.5, pg_blob_mask.height * 0.5);
-    blobShape.setFill((255 << 24) | (255 << 16) | (255 << 8) | 255);
-    pg_blob_mask.shape(blobShape);
-    pg_blob_mask.endDraw();
+    // graphics buffer
+    pg_blob.beginDraw();
+    pg_blob.clear();
+    pg_blob.translate(pg_blob.width * 0.5, pg_blob.height * 0.5);
+    //blobShape.setFill((255 << 24) | (255 << 16) | (255 << 8) | 255);
+    blobShape.setFill((255 << 24) | (35 << 16) | (62 << 8) | 33);
+    pg_blob.shape(blobShape);
+    pg_blob.endDraw();
     
   }
   
