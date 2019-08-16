@@ -8,33 +8,28 @@ import controlP5.*;
 
 import processing.video.Capture;
 
-// layout
+// options
 public boolean isFullScreen = false;
 public int canvasWidth = 840;
 public int canvasHeight = 1188;
+public int graphic = INK;
+public color fluidColor = BLACK; // BLACK, WHITE, NAVY, TEAL
+public boolean isUsingCam = true;
+public boolean isShowingCam = false;
+
+// layout
 public int canvasX;
 public int canvasY;
 
 // fluid
 public Fluid fluid_data;
 public PGraphics2D pg_fluid;
-public PGraphics2D pg_fluid_bw;
-public int fluidMode = Fluid.BW; // BW, COLOR
-public color fluidColor = Fluid.NAVY; // NAVY, TEAL
 
 // blob
 public Blob blob;
-public PGraphics2D pg_blob_mask;
-
-// graphic
-static final int INK = 0;
-static final int BLOB = 1;
-public int graphic = INK;
-public PGraphics2D pg_graphic;
+public PGraphics2D pg_blob;
 
 // camera
-public boolean isUsingCam = true;
-public boolean isShowingCam = false;
 public Capture cam;
 public int cam_w = 640;
 public int cam_h = 480;
@@ -46,7 +41,6 @@ public PShape sansShape;
 public PShape serifShape;
 public PGraphics pg_sans;
 public PGraphics pg_serif;
-private float scaleFac;
 private float hmargin = 75.0;
 private float vmargin;
 
@@ -58,9 +52,17 @@ public color fillColor;
 PShader shader;
 
 // controls
-public ControlP5 cp5;
-public ButtonBar bb;
-public int bbHeight;
+//public ControlP5 cp5;
+//public ButtonBar bb;
+//public int bbHeight;
+
+// static constants
+static final int INK = 0;
+static final int BLOB = 1;
+static final color BLACK = (255 << 24) | (0   << 16) | (0   << 8) | 0  ; // 0   0   0
+static final color WHITE = (255 << 24) | (255 << 16) | (255 << 8) | 255; // 255 255 255
+static final color NAVY  = (255 << 24) | (0   << 16) | (0   << 8) | 255; // 0   0   255
+static final color TEAL  = (255 << 24) | (0   << 16) | (255 << 8) | 255; // 0   255 255
 
 public void settings() {
   if (isFullScreen) {
@@ -71,11 +73,11 @@ public void settings() {
 }
 
 public void setup() {
-  
-  frameRate(120);
+
+  frameRate(60);
+  //noSmooth();
   
   //if (isFullScreen) {
-  //  orientation(PORTRAIT);
   //  canvasHeight = height;
   //  canvasWidth = int(canvasHeight * 0.707);
   //}
@@ -86,9 +88,11 @@ public void setup() {
   // shapes
   pg_sans = createGraphics(canvasWidth, canvasHeight);
   pg_serif = createGraphics(canvasWidth, canvasHeight);
+  pg_sans.noSmooth();
+  pg_serif.noSmooth();
   sansShape = loadShape("logo_sans.svg");
   serifShape = loadShape("logo_serif.svg");
-  scaleFac = (canvasWidth - hmargin*2) / serifShape.width;
+  float scaleFac = (canvasWidth - hmargin*2) / serifShape.width;
   sansShape.scale(scaleFac);
   serifShape.scale(scaleFac);
   vmargin = (canvasHeight - sansShape.height*scaleFac) * 0.5;
@@ -96,7 +100,6 @@ public void setup() {
   // FLUID
   fluid_data = new Fluid(this);
   pg_fluid = (PGraphics2D) createGraphics(canvasWidth, canvasHeight, P2D);
-  //pg_fluid_bw = (PGraphics2D) createGraphics(canvasWidth, canvasHeight, P2D);
   // camera
   if (isUsingCam) {
     cam = new Capture(this, cam_w, cam_h, 30);
@@ -105,7 +108,8 @@ public void setup() {
     pg_cam_a = (PGraphics2D) createGraphics(cam_w, cam_h, P2D);
     pg_cam_a.noSmooth();
     pg_cam_a.beginDraw();
-    pg_cam_a.background(0);
+    //pg_cam_a.background(0);
+    pg_cam_a.clear();
     pg_cam_a.endDraw();
     pg_cam_b = (PGraphics2D) createGraphics(cam_w, cam_h, P2D);
     pg_cam_b.noSmooth();
@@ -113,10 +117,7 @@ public void setup() {
 
   // BLOB
   blob = new Blob();
-  pg_blob_mask = (PGraphics2D) createGraphics(canvasWidth, canvasHeight, P2D);
-  
-  // graphic
-  pg_graphic = (PGraphics2D) createGraphics(canvasWidth, canvasHeight, P2D);
+  pg_blob = (PGraphics2D) createGraphics(canvasWidth, canvasHeight, P2D);
   
   // controls
   //cp5 = new ControlP5(this);
@@ -135,6 +136,12 @@ public void setup() {
   //}
   
   shader = loadShader("blend.glsl");
+  if (isShowingCam) {
+    shader.set("tex_cam", cam);
+  }
+  shader.set("tex_fluid", pg_fluid);
+  shader.set("tex_sans", pg_sans);
+  shader.set("tex_serif", pg_serif);
   
   updateGraphic();
   
@@ -161,68 +168,12 @@ public void draw() {
   // prepare graphic
   if (graphic == INK) {
     fluid_data.display();
-    //pg_graphic = pg_fluid;
-    if (isShowingCam) {
-      shader.set("tex_cam", cam);
-    }
-    shader.set("tex_fluid", pg_fluid);
-    shader.set("tex_sans", pg_sans);
-    shader.set("tex_serif", pg_serif);
     shader(shader);
+    noStroke();
     rect(0, 0, width, height);
-    //pg_fluid_bw = pg_fluid;
-    //pg_fluid_bw.beginDraw();
-    //pg_fluid_bw.filter(THRESHOLD);
-    //pg_fluid_bw.endDraw();
-    //pg_fluid_bw.loadPixels();
-    //for (int i = 0; i < pg_fluid_bw.pixels.length; i++) {
-    //  color pixel = pg_fluid_bw.pixels[i];
-    //  if ((pixel >> 24 & 0xFF) == 255) {
-    //    println(pixel);
-    //    if ((pixel >> 16 & 0xFF) > 127 &&
-    //        (pixel >> 8 & 0xFF) > 127 &&
-    //        (pixel & 0xFF) > 127) {
-    //      pg_fluid_bw.pixels[i] = (255 << 24) | (255 << 16) | (255 << 8) | 255;
-    //    } else {
-    //      pg_fluid_bw.pixels[i] = (255 << 24) | (0 << 16) | (0 << 8) | 0;
-    //    }
-    //  }
-    //}
-    //pg_fluid_bw.updatePixels();
   } else if (graphic == BLOB) {
     blob.display();
-    pg_graphic = pg_blob_mask;
   }
-
-  // sans
-  //if (graphic == INK) {
-  //  pg_sans.loadPixels();
-  //  pg_graphic.loadPixels();
-  //  //pg_fluid_bw.loadPixels();
-  //  for (int i = 0; i < pg_sans.pixels.length; i++) {
-  //    if ((pg_sans.pixels[i] >> 24 & 0xFF) != 0) {
-  //      // bit masking formula from oshoham
-  //      // https://github.com/processing/processing/issues/1738
-  //      int min = (255 << 24) | (0 << 16) | (0 << 8) | 0;
-  //      int max = (255 << 24) | (255 << 16) | (255 << 8) | 255;
-  //      int alpha = int(constrain(-(pg_graphic.pixels[i] >> 24 & 0xFF), min, max));
-  //      //int alpha = int(constrain(-(pg_fluid_bw.pixels[i] >> 24 & 0xFF), min, max));
-  //      pg_sans.pixels[i] = (alpha << 24) | (pg_sans.pixels[i] & 0xFFFFFF);
-  //    }
-  //  }
-  //  pg_sans.updatePixels();
-  //}
-  //image(pg_sans, canvasX, canvasY);
-  //image(pg_fluid, 0, 0);
-  
-  // serif
-  //if (graphic == INK) {
-  //  //pg_serif.mask(pg_fluid_bw);
-  //  pg_serif.mask(pg_graphic);
-  //} else {
-  //  pg_serif.mask(pg_graphic);
-  //}
-  //image(pg_serif, canvasX, canvasY);
 
   // show title bar info
   if (!isFullScreen) {
@@ -239,17 +190,15 @@ public void draw() {
 public void updateGraphic() {
   
   if (graphic == INK) {
-    if (fluidMode == Fluid.BW) {
+    if (fluidColor == BLACK) {
       bgColor = (255 << 24) | (255 << 16) | (255 << 8) | 255;
       fillColor = (255 << 24) | (0 << 16) | (0 << 8) | 0;
-    } else if (fluidMode == Fluid.COLOR) {
-      if (fluidColor == Fluid.NAVY) {
-        bgColor = (255 << 24) | (198 << 16) | (198 << 8) | 235;
-        fillColor = (255 << 24) | (28 << 16) | (28 << 8) | 70;
-      } else if (fluidColor == Fluid.TEAL) {
-        bgColor = (255 << 24) | (177 << 16) | (213 << 8) | 213;
-        fillColor = (255 << 24) | (15 << 16) | (77 << 8) | 77;
-      }
+    } else if (fluidColor == NAVY) {
+      bgColor = (255 << 24) | (198 << 16) | (198 << 8) | 235;
+      fillColor = (255 << 24) | (28 << 16) | (28 << 8) | 70;
+    } else if (fluidColor == TEAL) {
+      bgColor = (255 << 24) | (177 << 16) | (213 << 8) | 213;
+      fillColor = (255 << 24) | (15 << 16) | (77 << 8) | 77;
     }
   } else if (graphic == BLOB) {
     bgColor = (255 << 24) | (199 << 16) | (209 << 8) | 181;
@@ -257,6 +206,7 @@ public void updateGraphic() {
   }
 
   pg_sans.beginDraw();
+  pg_sans.clear();
   pg_sans.noStroke();
   pg_sans.translate(hmargin, vmargin);
   sansShape.setFill(fillColor);
@@ -264,6 +214,7 @@ public void updateGraphic() {
   pg_sans.endDraw();
 
   pg_serif.beginDraw();
+  pg_serif.clear();
   pg_serif.noStroke();
   //pg_serif.background(fillColor);
   pg_serif.translate(hmargin, vmargin);
@@ -280,7 +231,7 @@ public void updateGraphic() {
 
 public void mousePressed() {
   //if (mouseY > canvasY + bbHeight && mouseY < canvasY + canvasHeight) {
-    if (graphic == 0) {
+    if (graphic == INK) {
       fluid_data.reset();
     } else if (graphic == 1) {
       blob.reset();

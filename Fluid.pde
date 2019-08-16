@@ -15,15 +15,11 @@ class Fluid implements DwFluid2D.FluidData {
   // fluid parameters
   private float px, py;
   private float vx, vy;
-  private float dissipVel = 0.99f;
-  private float dissipDens = 0.99f;
+  private float dissipVel = 0.95f;
+  private float dissipDens = 1.0f;
+  //private float vorticity = 0.0f;
   private float fluidVel;
   private float fluidRad;
-  
-  static final int BW = 0;
-  static final int COLOR = 1;
-  static final color NAVY = -16776961; // color(0, 0, 255)
-  static final color TEAL = -16711681; // color(0, 255, 255)
   
   public Fluid(PApplet papp) {
 
@@ -34,11 +30,12 @@ class Fluid implements DwFluid2D.FluidData {
     // fluid parameters
     fluidRad = canvasWidth * 0.35;
     fluid.param.dissipation_velocity = dissipVel;
-    fluid.param.dissipation_density  = dissipDens;
+    fluid.param.dissipation_density = dissipDens;
     //fluid.param.dissipation_density     = 0.90f;
     //fluid.param.dissipation_velocity    = 0.80f;
     //fluid.param.dissipation_temperature = 0.70f;
     //fluid.param.vorticity               = 0.30f;
+    //fluid.param.vorticity = vorticity;
 
     if (isUsingCam) {
       opticalflow = new DwOpticalFlow(context, cam_w, cam_h);
@@ -50,7 +47,8 @@ class Fluid implements DwFluid2D.FluidData {
   public void updateCam() {
     // render to offscreenbuffer
     pg_cam_b.beginDraw();
-    pg_cam_b.background(0);
+    //pg_cam_b.background(0);
+    pg_cam_b.clear();
     pg_cam_b.scale(-1, 1);
     pg_cam_b.image(cam, -cam_w, 0);
     pg_cam_b.endDraw();
@@ -90,16 +88,11 @@ class Fluid implements DwFluid2D.FluidData {
       addVelocityTexture(fluid, opticalflow);
     }
     
-    if (fluidMode == BW) {
-      addDensityBlob(fluid, px, py, fluidRad, 0.0f, 0.0f, 0.0f, 0.01f);
-      //addDensityBlob(fluid, px, py, fluidRad, 1.0f, 1.0f, 1.0f, 0.01f);
-    } else if (fluidMode == COLOR) {
-      addDensityBlob(fluid, px, py, fluidRad, 
-        (fluidColor >> 16) & 0xFF,
-        (fluidColor >> 8) & 0xFF,
-        (fluidColor) & 0xFF,
-        0.01f);
-    }
+    addDensityBlob(fluid, px, py, fluidRad, 
+      (fluidColor >> 16) & 0xFF,
+      (fluidColor >> 8) & 0xFF,
+      (fluidColor) & 0xFF,
+      0.01f);
   }
   
   public void display() {
