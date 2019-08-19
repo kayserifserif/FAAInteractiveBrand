@@ -1,23 +1,17 @@
 class Fluid implements DwFluid2D.FluidData {
   
-  // library context
-  private DwPixelFlow context;
-  
-  // collection of imageprocessing filters
-  private DwFilter filter;
-  
-  // fluid solver
-  private DwFluid2D fluid;
-
-  // optical flow
-  private DwOpticalFlow opticalflow;
+  // fluid simulation setup
+  private DwPixelFlow context; // library context
+  private DwFilter filter; // image processing filters
+  private DwFluid2D fluid; // fluid solver
+  private DwOpticalFlow opticalflow; // optical flow
 
   // fluid parameters
   private float px, py;
   private float vx, vy;
   private float dissipVel = 0.95f;
   private float dissipDens = 1.0f;
-  //private float vorticity = 0.0f;
+  private float vorticity = 0.0f;
   private float fluidVel;
   private float fluidRad;
   
@@ -27,15 +21,11 @@ class Fluid implements DwFluid2D.FluidData {
     filter = new DwFilter(context);
     newFluid();
   
-    // fluid parameters
+    // set fluid parameters
     fluidRad = canvasWidth * 0.35;
     fluid.param.dissipation_velocity = dissipVel;
     fluid.param.dissipation_density = dissipDens;
-    //fluid.param.dissipation_density     = 0.90f;
-    //fluid.param.dissipation_velocity    = 0.80f;
-    //fluid.param.dissipation_temperature = 0.70f;
-    //fluid.param.vorticity               = 0.30f;
-    //fluid.param.vorticity = vorticity;
+    fluid.param.vorticity = vorticity;
 
     if (isUsingCam) {
       opticalflow = new DwOpticalFlow(context, cam_w, cam_h);
@@ -44,36 +34,13 @@ class Fluid implements DwFluid2D.FluidData {
   
   }
   
-  public void updateCam() {
-    // render to offscreenbuffer
-    pg_cam_b.beginDraw();
-    //pg_cam_b.background(0);
-    pg_cam_b.clear();
-    pg_cam_b.scale(-1, 1);
-    pg_cam_b.image(cam, -cam_w, 0);
-    pg_cam_b.endDraw();
-    swapCamBuffer(); // "pg_cam_a" has the image now
-
-    // update Optical Flow
-    opticalflow.update(pg_cam_a);
-
-    // apply grayscale for better contrast
-    filter.luminance.apply(pg_cam_a, pg_cam_b); 
-    swapCamBuffer();
-  }
-  
-  public void reset() { 
-    newFluid();
-  }
-  
   private void newFluid() {
     fluid = new DwFluid2D(context, canvasWidth, canvasHeight, 1);
     fluid.addCallback_FluiData(this);
   }
 
   @Override
-    // this is called during the fluid-simulation update step.
-    public void update(DwFluid2D fluid) {
+  public void update(DwFluid2D fluid) {
     
     px = canvasWidth * 0.5;
     py = canvasHeight * 0.5;
@@ -83,11 +50,13 @@ class Fluid implements DwFluid2D.FluidData {
 
     fluidVel = constrain(60.0/(round(frameCount*0.01)), 10.0f, 30.0f);
     
+    // velocity
     addVelocityBlob(fluid, px, py, fluidVel, vx, vy);
     if (isUsingCam) {
       addVelocityTexture(fluid, opticalflow);
     }
     
+    // density
     addDensityBlob(fluid, px, py, fluidRad, 
       (fluidColor >> 16) & 0xFF,
       (fluidColor >> 8) & 0xFF,
@@ -101,7 +70,7 @@ class Fluid implements DwFluid2D.FluidData {
     pg_fluid.clear();
     pg_fluid.endDraw();
     fluid.update();
-    // add fluid stuff to rendering
+    // add fluid to rendering
     fluid.renderFluidTextures(pg_fluid, 0);
   }
   
@@ -132,12 +101,12 @@ class Fluid implements DwFluid2D.FluidData {
     context.beginDraw(fluid.tex_velocity.dst);
     DwGLSLProgram shader = context.createShader("data/addVelocityBlob.frag");
     shader.begin();
-    shader.uniform2f     ("wh", fluid.fluid_w, fluid.fluid_h);       
+    shader.uniform2f("wh", fluid.fluid_w, fluid.fluid_h);       
     shader.uniform2f("data_pos", px, py);
     shader.uniform1f("data_rad", fluidVel);
     shader.uniform2f("data_velocity", vx, vy);
     shader.uniformTexture("tex_velocity_old", fluid.tex_velocity.src);
-    shader.uniform1i     ("blend_mode", 2);
+    shader.uniform1i("blend_mode", 2);
     shader.drawFullScreenQuad();
     shader.end();
     context.endDraw();
@@ -151,10 +120,10 @@ class Fluid implements DwFluid2D.FluidData {
     context.beginDraw(fluid.tex_velocity.dst);
     DwGLSLProgram shader = context.createShader("data/addVelocity.frag");
     shader.begin();
-    shader.uniform2f     ("wh", fluid.fluid_w, fluid.fluid_h);                                                                   
-    shader.uniform1i     ("blend_mode", 2);    
-    shader.uniform1f     ("multiplier", 1.0f);   
-    shader.uniform1f     ("mix_value", 0.1f);
+    shader.uniform2f("wh", fluid.fluid_w, fluid.fluid_h);                                                                   
+    shader.uniform1i("blend_mode", 2);    
+    shader.uniform1f("multiplier", 1.0f);   
+    shader.uniform1f("mix_value", 0.1f);
     shader.uniformTexture("tex_opticalflow", opticalflow.frameCurr.velocity);
     shader.uniformTexture("tex_velocity_old", fluid.tex_velocity.src);
     shader.drawFullScreenQuad();
@@ -163,11 +132,32 @@ class Fluid implements DwFluid2D.FluidData {
     context.end("app.addVelocity");
     fluid.tex_velocity.swap();
   }
+  
+  public void updateCam() {
+    // render to offscreenbuffer
+    pg_cam_b.beginDraw();
+    pg_cam_b.clear();
+    pg_cam_b.scale(-1, 1);
+    pg_cam_b.image(cam, -cam_w, 0);
+    pg_cam_b.endDraw();
+    swapCamBuffer(); // pg_cam_a has the image now
+
+    // update optical flow
+    opticalflow.update(pg_cam_a);
+
+    // apply grayscale for better contrast
+    filter.luminance.apply(pg_cam_a, pg_cam_b); 
+    swapCamBuffer();
+  }
 
   private void swapCamBuffer() {
     PGraphics2D tmp = pg_cam_a;
     pg_cam_a = pg_cam_b;
     pg_cam_b = tmp;
+  }
+  
+  public void reset() { 
+    newFluid();
   }
   
 }

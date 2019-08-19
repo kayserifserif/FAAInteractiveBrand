@@ -23,13 +23,20 @@ import com.thomasdiewald.pixelflow.java.imageprocessing.filter.DwFilter;
 
 import processing.video.Capture;
 
-// options
+/*******
+ OPTIONS
+ This section contains most of the
+ variables you may want to change.
+ *******/
 public boolean isFullScreen = false;
 public int canvasWidth = 840;
 public int canvasHeight = 1188;
 public color fluidColor = BLACK; // BLACK, WHITE, NAVY, TEAL
 public boolean isUsingCam = true;
 public boolean isShowingCam = false;
+/*******
+ END OPTIONS
+ *******/
 
 // layout
 public int canvasX;
