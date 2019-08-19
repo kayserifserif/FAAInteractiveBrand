@@ -32,7 +32,7 @@ import processing.video.Capture;
 public boolean isFullScreen = false;
 public int canvasWidth = 840;
 public int canvasHeight = 1188;
-public color fluidColor = BLACK; // BLACK, WHITE, NAVY, TEAL
+public color fluidColor = BLACK; // BLACK (ON) WHITE, NAVY (ON) LAVENDER, TEAL (ON) LIGHTBLUE
 public boolean isUsingCam = true;
 public boolean isShowingCam = false;
 /*******
@@ -72,10 +72,12 @@ PShader shader;
 // static constants
 static final int INK = 0;
 static final int BLOB = 1;
-static final color BLACK = (255 << 24) | (0   << 16) | (0   << 8) | 0  ; // 0   0   0
-static final color WHITE = (255 << 24) | (255 << 16) | (255 << 8) | 255; // 255 255 255
-static final color NAVY  = (255 << 24) | (0   << 16) | (0   << 8) | 255; // 0   0   255
-static final color TEAL  = (255 << 24) | (0   << 16) | (255 << 8) | 255; // 0   255 255
+static final color BLACK     = (255 << 24) | (0   << 16) | (0   << 8) | 0  ; // 0   0   0
+static final color WHITE     = (255 << 24) | (255 << 16) | (255 << 8) | 255; // 255 255 255
+static final color NAVY      = (255 << 24) | (0   << 16) | (0   << 8) | 255; // 0   0   255
+static final color LAVENDER  = (255 << 24) | (198 << 16) | (198 << 8) | 235; // 198 198 235
+static final color TEAL      = (255 << 24) | (0   << 16) | (153 << 8) | 117; // 0   153 117
+static final color LIGHTBLUE = (255 << 24) | (177 << 16) | (213 << 8) | 213; // 177 213 213
 
 public void settings() {
   if (isFullScreen) {
@@ -112,15 +114,15 @@ public void setup() {
   
   // colors
   if (fluidColor == BLACK) {
-    bgColor = (255 << 24) | (255 << 16) | (255 << 8) | 255;
-    fillColor = (255 << 24) | (0 << 16) | (0 << 8) | 0;
+    bgColor = WHITE;
+  } else if (fluidColor == WHITE) {
+    bgColor = BLACK;
   } else if (fluidColor == NAVY) {
-    bgColor = (255 << 24) | (198 << 16) | (198 << 8) | 235;
-    fillColor = (255 << 24) | (28 << 16) | (28 << 8) | 70;
+    bgColor = LAVENDER;
   } else if (fluidColor == TEAL) {
-    bgColor = (255 << 24) | (177 << 16) | (213 << 8) | 213;
-    fillColor = (255 << 24) | (15 << 16) | (77 << 8) | 77;
+    bgColor = LIGHTBLUE;
   }
+  fillColor = fluidColor;
   
   // sans
   pg_sans.beginDraw();
@@ -168,6 +170,7 @@ public void setup() {
   shader.set("tex_fluid", pg_fluid);
   shader.set("tex_sans", pg_sans);
   shader.set("tex_serif", pg_serif);
+  //shader.set("fluidColor", fluidColor);
   
 }
 

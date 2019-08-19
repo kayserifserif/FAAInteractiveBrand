@@ -57,11 +57,13 @@ class Fluid implements DwFluid2D.FluidData {
     }
     
     // density
-    addDensityBlob(fluid, px, py, fluidRad, 
+    addDensityBlob(fluid, px, py, fluidRad,
       (fluidColor >> 16) & 0xFF,
       (fluidColor >> 8) & 0xFF,
       (fluidColor) & 0xFF,
       0.01f);
+    
+    //addDensityBlob(fluid, px, py, fluidRad, 0.0f, 1.0f, 1.0f, 0.01f);
   }
   
   public void display() {

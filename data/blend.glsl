@@ -1,4 +1,4 @@
-#version 330
+#version 420
 
 #ifdef GL_ES
 precision mediump float;
@@ -28,13 +28,14 @@ void main() {
   // vec4 cam = texture(tex_cam, texCoord);
   // cam = vec4(cam.rgb, camTint); // tint cam
   vec4 fluid = texture(tex_fluid, invTexCoord);
-  bvec4 mask = bvec4(step(maskThresh, fluid)); // apply bw threshold
-  bvec4 sans = bvec4(texture(tex_sans, texCoord));
-  bvec4 serif = bvec4(texture(tex_serif, texCoord));
+  vec4 mask = vec4(step(maskThresh, fluid.a)); // apply bw threshold
+  vec4 sans = texture(tex_sans, texCoord);
+  vec4 serif = texture(tex_serif, texCoord);
   
   // blend
-  sans = !mask && sans; // xor
-  serif = mask && serif; // intersection
-  fragColor = vec4(sans) + fluid - vec4(serif);
+  sans *= float(!bool(mask) && bool(sans.a)); // xor
+  serif *= float(bool(mask) && bool(serif.a)); // intersection
+  fragColor = mix(sans, fluid, fluid.a);
+  fragColor = mix(fragColor, serif, serif.a);
 
 }
