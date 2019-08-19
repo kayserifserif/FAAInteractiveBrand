@@ -19,19 +19,22 @@ out vec4 fragColor;
 float maskThresh = 0.6;
 
 void main() {
+
   // coordinates
   vec2 texCoord = vertTexCoord.st;
   vec2 invTexCoord = vec2(vertTexCoord.s, 1.0 - vertTexCoord.t); // invert y
+  
   // textures
   // vec4 cam = texture(tex_cam, texCoord);
   // cam = vec4(cam.rgb, camTint); // tint cam
   vec4 fluid = texture(tex_fluid, invTexCoord);
-  vec4 mask = step(maskThresh, texture(tex_fluid, invTexCoord)); // apply bw threshold
-  vec4 sans = texture(tex_sans, texCoord);
-  vec4 serif = texture(tex_serif, texCoord);
+  bvec4 mask = bvec4(step(maskThresh, fluid)); // apply bw threshold
+  bvec4 sans = bvec4(texture(tex_sans, texCoord));
+  bvec4 serif = bvec4(texture(tex_serif, texCoord));
+  
   // blend
-  sans = step(1.0 - mask.a, sans); // inverted mask
-  serif = step(mask.a, serif); // mask
-  vec4 color = fluid + sans * serif;
-  fragColor = color;
+  sans = !mask && sans; // xor
+  serif = mask && serif; // intersection
+  fragColor = vec4(sans) + fluid - vec4(serif);
+
 }
