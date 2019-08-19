@@ -12,6 +12,7 @@ uniform sampler2D tex_serif;
 
 in vec4 vertColor;
 in vec4 vertTexCoord;
+uniform int fluidColor;
 
 out vec4 fragColor;
 
@@ -28,6 +29,8 @@ void main() {
   // vec4 cam = texture(tex_cam, texCoord);
   // cam = vec4(cam.rgb, camTint); // tint cam
   vec4 fluid = texture(tex_fluid, invTexCoord);
+  vec4 tex_fluidColor = vec4(fluidColor >> 16 & 0xFF, fluidColor >> 8 & 0xFF, fluidColor & 0xFF, 1.0);
+  fluid = clamp(fluid, vec4(0), tex_fluidColor); // prevent oversaturation
   vec4 mask = vec4(step(maskThresh, fluid.a)); // apply bw threshold
   vec4 sans = texture(tex_sans, texCoord);
   vec4 serif = texture(tex_serif, texCoord);

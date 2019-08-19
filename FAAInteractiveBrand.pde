@@ -74,7 +74,7 @@ static final int INK = 0;
 static final int BLOB = 1;
 static final color BLACK     = (255 << 24) | (0   << 16) | (0   << 8) | 0  ; // 0   0   0
 static final color WHITE     = (255 << 24) | (255 << 16) | (255 << 8) | 255; // 255 255 255
-static final color NAVY      = (255 << 24) | (0   << 16) | (0   << 8) | 255; // 0   0   255
+static final color NAVY      = (255 << 24) | (0   << 16) | (35  << 8) | 98 ; // 0   35  98
 static final color LAVENDER  = (255 << 24) | (198 << 16) | (198 << 8) | 235; // 198 198 235
 static final color TEAL      = (255 << 24) | (0   << 16) | (153 << 8) | 117; // 0   153 117
 static final color LIGHTBLUE = (255 << 24) | (177 << 16) | (213 << 8) | 213; // 177 213 213
@@ -170,7 +170,7 @@ public void setup() {
   shader.set("tex_fluid", pg_fluid);
   shader.set("tex_sans", pg_sans);
   shader.set("tex_serif", pg_serif);
-  //shader.set("fluidColor", fluidColor);
+  shader.set("fluidColor", fluidColor);
   
 }
 
