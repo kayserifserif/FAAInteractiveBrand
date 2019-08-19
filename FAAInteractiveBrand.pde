@@ -1,12 +1,13 @@
 /**
  * 
- * Fine Art Asia Interactive Ink Branding Experience
- * Katherine Yang for Superunion, 2019 - https://whykatherine.github.io
+ * Fine Art Asia Interactive Ink Branding Experience, 2019
+ * from Superunion - https://www.superunion.com
+ * by Katherine Yang - https://whykatherine.github.io
  * 
  * An interactive branding experience that uses computer vision
- * and motion tracking to create a dynamic ink visual that reveals
- * and obscures the alternating traditional and modern aspects of
- * the Fine Art Asia brand.
+ * and motion tracking to create a dynamic ink visual that alternately
+ * reveals and obscures the traditional and modern aspects of the
+ * Fine Art Asia brand.
  * 
  * Requires a connected camera device.
  * 
@@ -182,7 +183,7 @@ public void draw() {
     }
   }
   
-  // update graphic
+  // update visuals
   fluid_data.display();
   shader(shader);
   noStroke();
