@@ -1,3 +1,20 @@
+/**
+ * 
+ * Fine Art Asia Interactive Ink Branding Experience
+ * Katherine Yang for Superunion, 2019 - https://whykatherine.github.io
+ * 
+ * An interactive branding experience that uses computer vision
+ * and motion tracking to create a dynamic ink visual that reveals
+ * and obscures the alternating traditional and modern aspects of
+ * the Fine Art Asia brand.
+ * 
+ * Requires a connected camera device.
+ * 
+ * PixelFlow library by Thomas Diewald, 2016 - https://diwi.github.io/PixelFlow/
+ * Video library by Processing - https://processing.org/reference/libraries/video/index.html
+ * 
+ */
+
 import com.thomasdiewald.pixelflow.java.DwPixelFlow;
 import com.thomasdiewald.pixelflow.java.dwgl.DwGLSLProgram;
 import com.thomasdiewald.pixelflow.java.fluid.DwFluid2D;
