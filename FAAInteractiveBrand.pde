@@ -95,7 +95,6 @@ public void settings() {
 public void setup() {
 
   frameRate(60);
-  //noSmooth();
   
   if (isFullScreen) {
     if (width > height) {
@@ -109,7 +108,6 @@ public void setup() {
   
   canvasX = int((width - canvasWidth) * 0.5);
   canvasY = int((height - canvasHeight) * 0.5);
-  println(width, canvasWidth, canvasX);
 
   // shapes
   pg_sans = createGraphics(canvasWidth, canvasHeight);
@@ -169,7 +167,11 @@ public void setup() {
   }
   
   // shader
-  shader = loadShader("blendFrag.glsl", "blendVert.glsl");
+  if (isShowingCam) {
+    shader = loadShader("blendCam.frag", "blend.vert");
+  } else {
+    shader = loadShader("blend.frag", "blend.vert");
+  }
   shader.set( "canvasTranslate", new float[] {
       canvasX / (float(canvasWidth) / width),
       canvasY / (float(canvasHeight) / height),
@@ -193,7 +195,9 @@ public void setup() {
       ((fluidColor) & 0xFF) / 255.0,
       ((fluidColor >> 24) & 0xFF) / 255.0
     }, 4);
-  shader.set("camAlpha", camAlpha);
+  if (isShowingCam) {
+    shader.set("camAlpha", camAlpha);
+  }
   shader.set("maskThresh", maskThresh);
   
 }

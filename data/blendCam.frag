@@ -1,4 +1,4 @@
-#version 420
+#version 150
 
 #ifdef GL_ES
 precision mediump float;
@@ -22,12 +22,12 @@ void main() {
 
   // coordinates
   vec2 texCoord = vertTexCoord.st;
-  vec2 texCoordInvY = vec2(texCoord.s, 1.0 - texCoord.t);
+  vec2 texCoordInvY = vec2(texCoord.s, 1.0 - texCoord.t); // invert y
 
   // textures
-  vec4 cam = texture(tex_cam, texCoordInvY); // invert x
+  vec4 cam = texture(tex_cam, texCoordInvY);
   cam = vec4(cam.rgb, camAlpha); // tint cam
-  vec4 fluid = texture(tex_fluid, texCoordInvY); // invert y
+  vec4 fluid = texture(tex_fluid, texCoordInvY);
   fluid = clamp(fluid, vec4(0), fluidColor); // prevent oversaturation
   vec4 mask = vec4(step(maskThresh, fluid.a)); // apply bw threshold
   vec4 sans = texture(tex_sans, texCoord);
