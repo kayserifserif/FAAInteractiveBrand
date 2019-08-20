@@ -7,13 +7,24 @@ class Fluid implements DwFluid2D.FluidData {
   private DwOpticalFlow opticalflow; // optical flow
 
   // fluid parameters
-  private float px, py;
-  private float vx, vy;
+  private float posX, posY;
+  private float densRad;
+  private float widthPct = 0.35;
+  private float velX, velY;
+  private float velRad;
   private float dissipVel = 0.95f;
   private float dissipDens = 1.0f;
   private float vorticity = 0.0f;
-  private float fluidVel;
-  private float fluidRad;
+  
+  // animation
+  private int frameStart;
+  private float initBurst = 120.0f;
+  private float velFade = 0.01;
+  private float velMin = 50.0f;
+  private float velMax = 120.0f;
+  private float velRadFade = 0.05;
+  private float velRadMin = 10.0f;
+  private float velRadMax = 100.0f;
   
   public Fluid(PApplet papp) {
 
@@ -22,7 +33,9 @@ class Fluid implements DwFluid2D.FluidData {
     newFluid();
   
     // set fluid parameters
-    fluidRad = canvasWidth * 0.35;
+    posX = canvasWidth * 0.5;
+    posY = canvasHeight * 0.5;
+    densRad = canvasWidth * widthPct;
     fluid.param.dissipation_velocity = dissipVel;
     fluid.param.dissipation_density = dissipDens;
     fluid.param.vorticity = vorticity;
@@ -37,54 +50,50 @@ class Fluid implements DwFluid2D.FluidData {
   private void newFluid() {
     fluid = new DwFluid2D(context, canvasWidth, canvasHeight, 1);
     fluid.addCallback_FluiData(this);
+    frameStart = frameCount;
   }
 
   @Override
   public void update(DwFluid2D fluid) {
     
-    px = canvasWidth * 0.5;
-    py = canvasHeight * 0.5;
+    // update velocity according to frames
+    float vel = constrain(initBurst / ((frameCount - frameStart) * velFade), velMin, velMax);
+    velX = (round(random(1)) * 2 - 1) * vel; // random pos/neg x
+    velY = (round(random(1)) * 2 - 1) * vel; // random pos/neg y
+    velRad = constrain(initBurst / ((frameCount - frameStart) * velRadFade), velRadMin, velRadMax);
     
-    vx = (round(random(1))*2-1) * random(50.0, 100.0);
-    vy = (round(random(1))*2-1) * random(50.0, 100.0);
-
-    fluidVel = constrain(60.0/(round(frameCount*0.01)), 10.0f, 30.0f);
-    
-    // velocity
-    addVelocityBlob(fluid, px, py, fluidVel, vx, vy);
+    // add velocity
+    addVelocityBlob(fluid, posX, posY, velRad, velX, velY);
     if (isUsingCam) {
       addVelocityTexture(fluid, opticalflow);
     }
     
     // density
-    addDensityBlob(fluid, px, py, fluidRad,
+    addDensityBlob(fluid, posX, posY, densRad,
       (fluidColor >> 16) & 0xFF,
       (fluidColor >> 8) & 0xFF,
       (fluidColor) & 0xFF,
       0.01f);
     
-    //addDensityBlob(fluid, px, py, fluidRad, 0.0f, 1.0f, 1.0f, 0.01f);
   }
   
   public void display() {
-    // render everything
     pg_fluid.beginDraw();
     pg_fluid.clear();
     pg_fluid.endDraw();
     fluid.update();
-    // add fluid to rendering
     fluid.renderFluidTextures(pg_fluid, 0);
   }
   
   private void addDensityBlob(DwFluid2D fluid,
-      float px, float py, float fluidRad,
+      float posX, float posY, float fluidRad,
       float r, float g, float b, float intensity) {
     context.begin();
     context.beginDraw(fluid.tex_density.dst);
     DwGLSLProgram shader = context.createShader("data/addDensityBlob.frag");
     shader.begin();
     shader.uniform2f("wh", fluid.fluid_w, fluid.fluid_h);
-    shader.uniform2f("data_pos", px, py);
+    shader.uniform2f("data_pos", posX, posY);
     shader.uniform1f("data_rad", fluidRad);
     shader.uniform4f("data_density", r, g, b, intensity);
     shader.uniformTexture("tex_density_old", fluid.tex_density.src);
@@ -97,16 +106,16 @@ class Fluid implements DwFluid2D.FluidData {
   }
   
   private void addVelocityBlob(DwFluid2D fluid,
-      float px, float py, float fluidVel,
-      float vx, float vy) {
+      float posX, float posY, float fluidVel,
+      float velX, float velY) {
     context.begin();
     context.beginDraw(fluid.tex_velocity.dst);
     DwGLSLProgram shader = context.createShader("data/addVelocityBlob.frag");
     shader.begin();
     shader.uniform2f("wh", fluid.fluid_w, fluid.fluid_h);       
-    shader.uniform2f("data_pos", px, py);
+    shader.uniform2f("data_pos", posX, posY);
     shader.uniform1f("data_rad", fluidVel);
-    shader.uniform2f("data_velocity", vx, vy);
+    shader.uniform2f("data_velocity", velX, velY);
     shader.uniformTexture("tex_velocity_old", fluid.tex_velocity.src);
     shader.uniform1i("blend_mode", 2);
     shader.drawFullScreenQuad();
@@ -116,7 +125,7 @@ class Fluid implements DwFluid2D.FluidData {
     fluid.tex_velocity.swap();
   }
 
-  // custom shader, to add density from a texture (PGraphics2D) to the fluid.
+  // add velocity from texture (PGraphics2D) to fluid
   private void addVelocityTexture(DwFluid2D fluid, DwOpticalFlow opticalflow) {
     context.begin();
     context.beginDraw(fluid.tex_velocity.dst);
