@@ -16,6 +16,7 @@
  * 
  */
 
+
 import com.thomasdiewald.pixelflow.java.DwPixelFlow;
 import com.thomasdiewald.pixelflow.java.dwgl.DwGLSLProgram;
 import com.thomasdiewald.pixelflow.java.fluid.DwFluid2D;
@@ -23,6 +24,7 @@ import com.thomasdiewald.pixelflow.java.imageprocessing.DwOpticalFlow;
 import com.thomasdiewald.pixelflow.java.imageprocessing.filter.DwFilter;
 
 import processing.video.Capture;
+
 
 /*******
  OPTIONS
@@ -32,12 +34,13 @@ import processing.video.Capture;
 public boolean isFullScreen = false;
 public int canvasWidth = 840;
 public int canvasHeight = 1188;
-public color fluidColor = NAVY; // BLACK (ON) WHITE, NAVY (ON) LAVENDER, TEAL (ON) LIGHTBLUE
+public color fluidColor = BLACK; // BLACK (ON) WHITE, NAVY (ON) LAVENDER, TEAL (ON) LIGHTBLUE
 public boolean isUsingCam = true;
-public boolean isShowingCam = false;
-/*******
- END OPTIONS
- *******/
+public boolean isShowingCam = true;
+public float camAlpha = 0.1;
+public float maskThresh = 0.6;
+/*******/
+
 
 // layout
 public int canvasX;
@@ -78,6 +81,7 @@ static final color NAVY      = (255 << 24) | (0   << 16) | (35  << 8) | 98 ; // 
 static final color LAVENDER  = (255 << 24) | (198 << 16) | (198 << 8) | 235; // 198 198 235
 static final color TEAL      = (255 << 24) | (0   << 16) | (153 << 8) | 117; // 0   153 117
 static final color LIGHTBLUE = (255 << 24) | (177 << 16) | (213 << 8) | 213; // 177 213 213
+
 
 public void settings() {
   if (isFullScreen) {
@@ -141,7 +145,6 @@ public void setup() {
   pg_serif.beginDraw();
   pg_serif.clear();
   pg_serif.noStroke();
-  //pg_serif.background(fillColor);
   pg_serif.translate(hmargin, vmargin);
   serifShape.setFill(bgColor);
   serifShape.draw(pg_serif);
@@ -169,7 +172,7 @@ public void setup() {
   // shader
   shader = loadShader("blend.glsl");
   if (isShowingCam) {
-    shader.set("tex_cam", cam);
+    shader.set("tex_cam", pg_cam_a);
   }
   shader.set("tex_fluid", pg_fluid);
   shader.set("tex_sans", pg_sans);
@@ -180,6 +183,8 @@ public void setup() {
     ((fluidColor) & 0xFF) / 255.0,
     ((fluidColor >> 24) & 0xFF) / 255.0
   }, 4 );
+  shader.set("camAlpha", camAlpha);
+  shader.set("maskThresh", maskThresh);
   
 }
 
