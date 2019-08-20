@@ -32,7 +32,7 @@ import processing.video.Capture;
 public boolean isFullScreen = false;
 public int canvasWidth = 840;
 public int canvasHeight = 1188;
-public color fluidColor = BLACK; // BLACK (ON) WHITE, NAVY (ON) LAVENDER, TEAL (ON) LIGHTBLUE
+public color fluidColor = NAVY; // BLACK (ON) WHITE, NAVY (ON) LAVENDER, TEAL (ON) LIGHTBLUE
 public boolean isUsingCam = true;
 public boolean isShowingCam = false;
 /*******
@@ -119,8 +119,12 @@ public void setup() {
     bgColor = BLACK;
   } else if (fluidColor == NAVY) {
     bgColor = LAVENDER;
+  } else if (fluidColor == LAVENDER) {
+    bgColor = NAVY;
   } else if (fluidColor == TEAL) {
     bgColor = LIGHTBLUE;
+  } else if (fluidColor == LIGHTBLUE) {
+    bgColor = TEAL;
   }
   fillColor = fluidColor;
   
@@ -170,7 +174,12 @@ public void setup() {
   shader.set("tex_fluid", pg_fluid);
   shader.set("tex_sans", pg_sans);
   shader.set("tex_serif", pg_serif);
-  shader.set("fluidColor", fluidColor);
+  shader.set("fluidColor", new float[] {
+    ((fluidColor >> 16) & 0xFF) / 255.0,
+    ((fluidColor >> 8) & 0xFF) / 255.0,
+    ((fluidColor) & 0xFF) / 255.0,
+    ((fluidColor >> 24) & 0xFF) / 255.0
+  }, 4 );
   
 }
 
