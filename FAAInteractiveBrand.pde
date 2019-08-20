@@ -36,7 +36,7 @@ public int canvasWidth = 840;
 public int canvasHeight = 1188;
 public color fluidColor = BLACK; // BLACK (ON) WHITE, NAVY (ON) LAVENDER, TEAL (ON) LIGHTBLUE
 public boolean isUsingCam = true;
-public boolean isShowingCam = true;
+public boolean isShowingCam = false;
 public float camAlpha = 0.1;
 public float maskThresh = 0.6;
 /*******/
