@@ -31,7 +31,7 @@ import processing.video.Capture;
  This section contains most of the
  variables you may want to change.
  *******/
-public boolean isFullScreen = false;
+public boolean isFullScreen = true;
 public int canvasWidth = 840;
 public int canvasHeight = 1188;
 public color fluidColor = BLACK; // BLACK (ON) WHITE, NAVY (ON) LAVENDER, TEAL (ON) LIGHTBLUE
@@ -45,6 +45,7 @@ public float maskThresh = 0.6;
 // layout
 public int canvasX;
 public int canvasY;
+private float aspectRatio = 0.707;
 
 // fluid
 public Fluid fluid_data;
@@ -96,13 +97,19 @@ public void setup() {
   frameRate(60);
   //noSmooth();
   
-  //if (isFullScreen) {
-  //  canvasHeight = height;
-  //  canvasWidth = int(canvasHeight * 0.707);
-  //}
+  if (isFullScreen) {
+    if (width > height) {
+      canvasHeight = height;
+      canvasWidth = int(canvasHeight * aspectRatio);
+    } else {
+      canvasWidth = width;
+      canvasHeight = int(canvasWidth / aspectRatio);
+    }
+  }
   
   canvasX = int((width - canvasWidth) * 0.5);
   canvasY = int((height - canvasHeight) * 0.5);
+  println(width, canvasWidth, canvasX);
 
   // shapes
   pg_sans = createGraphics(canvasWidth, canvasHeight);
@@ -117,20 +124,13 @@ public void setup() {
   vmargin = (canvasHeight - sansShape.height*scaleFac) * 0.5;
   
   // colors
-  if (fluidColor == BLACK) {
-    bgColor = WHITE;
-  } else if (fluidColor == WHITE) {
-    bgColor = BLACK;
-  } else if (fluidColor == NAVY) {
-    bgColor = LAVENDER;
-  } else if (fluidColor == LAVENDER) {
-    bgColor = NAVY;
-  } else if (fluidColor == TEAL) {
-    bgColor = LIGHTBLUE;
-  } else if (fluidColor == LIGHTBLUE) {
-    bgColor = TEAL;
-  }
   fillColor = fluidColor;
+  if      (fluidColor == BLACK) { bgColor = WHITE; }
+  else if (fluidColor == WHITE) { bgColor = BLACK; }
+  else if (fluidColor == NAVY) { bgColor = LAVENDER; }
+  else if (fluidColor == LAVENDER) { bgColor = NAVY; }
+  else if (fluidColor == TEAL) { bgColor = LIGHTBLUE; }
+  else if (fluidColor == LIGHTBLUE) { bgColor = TEAL; }
   
   // sans
   pg_sans.beginDraw();
@@ -162,7 +162,6 @@ public void setup() {
     pg_cam_a = (PGraphics2D) createGraphics(cam_w, cam_h, P2D);
     pg_cam_a.noSmooth();
     pg_cam_a.beginDraw();
-    //pg_cam_a.background(0);
     pg_cam_a.clear();
     pg_cam_a.endDraw();
     pg_cam_b = (PGraphics2D) createGraphics(cam_w, cam_h, P2D);
@@ -170,7 +169,18 @@ public void setup() {
   }
   
   // shader
-  shader = loadShader("blend.glsl");
+  shader = loadShader("blendFrag.glsl", "blendVert.glsl");
+  shader.set( "canvasTranslate", new float[] {
+      canvasX / (float(canvasWidth) / width),
+      canvasY / (float(canvasHeight) / height),
+      0.0f, 0.0f
+    }, 4);
+  shader.set("canvasScale", new PMatrix3D(
+      float(canvasWidth) / width, 0.0f, 0.0f, 0.0f,
+      0.0f, float(canvasHeight) / height, 0.0f, 0.0f,
+      0.0f, 0.0f, 1.0f, 0.0f,
+      0.0f, 0.0f, 0.0f, 1.0f
+    ));
   if (isShowingCam) {
     shader.set("tex_cam", pg_cam_a);
   }
@@ -178,11 +188,11 @@ public void setup() {
   shader.set("tex_sans", pg_sans);
   shader.set("tex_serif", pg_serif);
   shader.set("fluidColor", new float[] {
-    ((fluidColor >> 16) & 0xFF) / 255.0,
-    ((fluidColor >> 8) & 0xFF) / 255.0,
-    ((fluidColor) & 0xFF) / 255.0,
-    ((fluidColor >> 24) & 0xFF) / 255.0
-  }, 4 );
+      ((fluidColor >> 16) & 0xFF) / 255.0,
+      ((fluidColor >> 8) & 0xFF) / 255.0,
+      ((fluidColor) & 0xFF) / 255.0,
+      ((fluidColor >> 24) & 0xFF) / 255.0
+    }, 4);
   shader.set("camAlpha", camAlpha);
   shader.set("maskThresh", maskThresh);
   
@@ -210,7 +220,7 @@ public void draw() {
   if (!isFullScreen) {
     info();
   }
-  
+    
 }
 
 public void mousePressed() {

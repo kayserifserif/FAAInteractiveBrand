@@ -9,7 +9,6 @@ class Fluid implements DwFluid2D.FluidData {
   // fluid parameters
   private float posX, posY;
   private float densRad;
-  private float widthPct = 0.35;
   private float velX, velY;
   private float velRad;
   private float dissipVel = 0.95f;
@@ -23,7 +22,8 @@ class Fluid implements DwFluid2D.FluidData {
   private float velMin = 50.0f;
   private float velMax = 120.0f;
   private float velRadFade = 0.05;
-  private float velRadMin = 10.0f;
+  //private float velRadMin = 10.0f;
+  private float velRadMin;
   private float velRadMax = 100.0f;
   
   public Fluid(PApplet papp) {
@@ -35,7 +35,9 @@ class Fluid implements DwFluid2D.FluidData {
     // set fluid parameters
     posX = canvasWidth * 0.5;
     posY = canvasHeight * 0.5;
-    densRad = canvasWidth * widthPct;
+    densRad = canvasWidth * 0.35;
+    velRadMin = canvasWidth * 0.01;
+    velRadMax = canvasWidth * 0.1;
     fluid.param.dissipation_velocity = dissipVel;
     fluid.param.dissipation_density = dissipDens;
     fluid.param.vorticity = vorticity;
